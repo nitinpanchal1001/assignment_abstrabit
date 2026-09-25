@@ -1,0 +1,68 @@
+# Render Blueprint for the FastAPI service.
+#
+# The Next.js client is NOT here — it goes to Vercel. Two always-on services
+# would not fit anyway: Render grants 750 free instance hours per WORKSPACE per
+# month, and a 31-day month is 744 hours, so the free tier affords exactly one
+# continuously-running service.
+#
+# Deploy: Render dashboard -> New -> Blueprint -> pick this repo.
+# Secrets are `sync: false`, so Render prompts for each one instead of it ever
+# living in git.
+
+services:
+  - type: web
+    name: groundwork-api
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+
+    # uv.lock stays the single source of truth for dependencies — no second
+    # requirements.txt to drift out of step with it. `--frozen` fails the build
+    # if the lockfile and pyproject disagree, rather than silently resolving
+    # something new in production.
+    buildCommand: pip install uv && uv sync --frozen --no-dev
+    startCommand: uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+    # Render pings this to decide the deploy succeeded. /api/health deliberately
+    # touches no dependency, so a slow Atlas cluster can't fail an otherwise
+    # good deploy.
+    healthCheckPath: /api/health
+
+    envVars:
+      # Makes the session cookie Secure. Without it the cookie is issued
+      # without the flag and a browser on HTTPS will refuse to keep it.
+      - key: ENVIRONMENT
+        value: production
+
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        value: groundwork
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: QDRANT_COLLECTION
+        value: workspace_chunks
+      - key: AUTH_SECRET
+        # Render generates a strong value and keeps it across deploys. Note
+        # that rotating it invalidates every existing session.
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_CHAT_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_EMBEDDING_MODEL
+        value: gemini-embedding-2
+      - key: EMBEDDING_DIMENSIONS
+        value: "1536"
+      - key: CHAT_RATE_LIMIT_PER_MINUTE
+        value: "12"
+      # Optional. Leave blank and send_notification reports itself as
+      # unconfigured to the model instead of failing the request.
+      - key: NOTIFICATION_WEBHOOK_URL
+        sync: false

@@ -3,6 +3,9 @@ import { serverApi } from '@/lib/server-api';
 import type { TaskRecord } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+// See dashboard/layout.tsx: Render cold start vs the Hobby function timeout.
+export const maxDuration = 60;
+
 
 const PRIORITY_TONE = { high: 'danger', medium: 'warning', low: 'neutral' } as const;
 

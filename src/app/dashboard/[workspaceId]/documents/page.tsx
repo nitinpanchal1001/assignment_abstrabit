@@ -6,6 +6,9 @@ import { serverApi } from '@/lib/server-api';
 import type { DocumentRecord, SharedDocument, Workspace } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+// See dashboard/layout.tsx: Render cold start vs the Hobby function timeout.
+export const maxDuration = 60;
+
 
 const STATUS_TONE = {
   ready: 'success',

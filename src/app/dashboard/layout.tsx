@@ -5,6 +5,14 @@ import { getOrNull } from '@/lib/server-api';
 import type { SessionPayload } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+/**
+ * The API sleeps on Render's free tier and takes up to a minute to wake. A
+ * Vercel function defaults to a 10s timeout on Hobby, so a cold backend would
+ * fail this render outright; 60s is the Hobby ceiling. The proxied /api/*
+ * rewrite is separate and gets 120s, so streaming a chat turn is unaffected.
+ */
+export const maxDuration = 60;
+
 
 /**
  * Loads the session once for the whole dashboard.

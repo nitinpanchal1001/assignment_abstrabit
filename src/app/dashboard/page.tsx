@@ -5,6 +5,9 @@ import { getOrNull } from '@/lib/server-api';
 import type { SessionPayload } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
+// See dashboard/layout.tsx: Render cold start vs the Hobby function timeout.
+export const maxDuration = 60;
+
 
 /**
  * Entry point. Resolves the user's first workspace and redirects into it.
