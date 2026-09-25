@@ -2,7 +2,8 @@
 
 ## Tools, and how the work split
 
-**Claude Code (Opus 5)** in the terminal, for essentially the whole build.
+**Claude Code (Opus 5)** in the terminal — the only AI tool used, for the whole
+build. No Cursor, no Copilot, no separate chat window.
 
 I drove architecture, the security model, and every judgement call about what
 "correct" meant. The AI wrote most of the code against those decisions — and,
