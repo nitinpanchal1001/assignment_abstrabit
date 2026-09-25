@@ -1,0 +1,21 @@
+# Keep the FastAPI service out of the Vercel build entirely.
+#
+# Vercel's import screen detects a Python app in backend/ and offers to deploy
+# it as a second "service" at /api/backend. That must not happen here: the API
+# runs on Render, and a Vercel-side /api/backend route would shadow part of the
+# /api/* rewrite in next.config.ts that proxies to it.
+#
+# vercel.json declaring no `services` key is what actually opts out of that
+# behaviour — per Vercel's docs, a project without `services` is evaluated as a
+# single ordinary app. This file is the belt to that pair of braces, and it also
+# trims the upload: the Next build reads nothing below.
+backend/
+
+# Fixtures for scripts/seed.py, which runs from a laptop, never from the build.
+sample-docs/
+
+# CI and agent-context files; not build inputs.
+.github/
+AI_NOTES.md
+CLAUDE.md
+AGENTS.md
