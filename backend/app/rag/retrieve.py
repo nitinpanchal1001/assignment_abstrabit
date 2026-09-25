@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from app.db.repositories import WorkspaceRepository
 from app.db.schema import Citation, MatchedChunk, RetrievalChunk, RetrievalDebug
 from app.gemini.embed import embed_query
+from app.sharing import owner_workspace_names
 from app.vector.qdrant import search_chunks
 
 DEFAULT_MATCH_COUNT = 8
@@ -97,6 +98,10 @@ async def retrieve_chunks(
             chunk_id=chunk.id,
             keyword_rank=index,
             payload={
+                # Carried so a keyword-only hit is attributed to its owner too.
+                # Without it, a shared document found by the text arm rather
+                # than the vector arm would silently look locally owned.
+                "workspace_id": chunk.workspace_id,
                 "document_id": chunk.document_id,
                 "filename": chunk.filename,
                 "section": chunk.section,
@@ -129,7 +134,13 @@ async def retrieve_chunks(
             MatchedChunk(
                 chunk_id=candidate.chunk_id,
                 document_id=str(payload.get("document_id", "")),
-                workspace_id=workspace_id,
+                # The OWNER, read from the stored payload — not the workspace
+                # doing the searching. Stamping the searcher here made a
+                # borrowed chunk indistinguishable from an owned one, which is
+                # precisely the distinction the retrieval-debug view exists to
+                # show. Falls back to the searcher only if the payload somehow
+                # lacks the field; `search_chunks` would already have raised.
+                workspace_id=str(payload.get("workspace_id") or workspace_id),
                 filename=str(payload.get("filename", "")),
                 section=payload.get("section"),
                 chunk_index=int(payload.get("chunk_index", 0)),
@@ -143,6 +154,17 @@ async def retrieve_chunks(
 
         if len(results) >= match_count:
             break
+
+    # Label anything that arrived through a share with its owner's name, so a
+    # reader can see that a claim rests on another workspace's document. One
+    # batched lookup for the whole result set, and none at all in the common
+    # case where nothing was shared.
+    foreign = {row.workspace_id for row in results if row.workspace_id != workspace_id}
+    if foreign:
+        names = await owner_workspace_names(foreign)
+        for row in results:
+            if row.workspace_id != workspace_id:
+                row.shared_from = names.get(row.workspace_id, "another workspace")
 
     citations = [
         Citation(
@@ -174,6 +196,7 @@ async def retrieve_chunks(
                 chunk_id=row.chunk_id,
                 document_id=row.document_id,
                 workspace_id=row.workspace_id,
+                shared_from=row.shared_from,
                 filename=row.filename,
                 section=row.section,
                 chunk_index=row.chunk_index,
