@@ -10,7 +10,7 @@
 #
 # Set the repository variable API_URL (Settings -> Secrets and variables ->
 # Actions -> Variables) to the Render service root, e.g.
-# https://groundwork-api.onrender.com — a variable rather than a secret,
+# https://groundwork-api-4gsp.onrender.com — a variable rather than a secret,
 # because it is a public hostname and secrets are masked in logs, which makes
 # failures here impossible to read.
 #

@@ -83,3 +83,17 @@ def test_citation_order_follows_relevance_not_mention_order() -> None:
 
 def test_retrieval_with_nothing_found_yields_nothing() -> None:
     assert _filter_used_citations("Anything [1].", []) == []
+
+
+def test_the_snippet_survives_the_filter() -> None:
+    """Clicking a [n] marker shows this text, so it has to come through intact.
+
+    The filter selects whole Citation objects rather than rebuilding them, but
+    that is an implementation detail a refactor could change — and the failure
+    would be a source panel that opens onto nothing.
+    """
+    kept = _filter_used_citations("As stated [2].", citations(3))
+
+    assert len(kept) == 1
+    assert kept[0].snippet == "Passage 2."
+    assert kept[0].filename == "doc2.md"

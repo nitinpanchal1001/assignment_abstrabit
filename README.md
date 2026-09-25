@@ -7,8 +7,12 @@ with citations, honest refusals, and tool calling.
 Every workspace's vectors live in **one shared Qdrant collection**. Isolation is
 enforced by the query, not by giving each tenant its own index.
 
-**Live app:** _not yet deployed — see [Deployment](#deployment) for the exact
-steps and what still needs doing._
+**Live app: https://assignment-abstrabit.vercel.app**
+
+Sign in with **`reviewer@example.com`** / **`groundwork-demo-2026`** — a
+throwaway account, already seeded with two workspaces and five documents.
+If you only try one thing, try **the isolation case** under
+"How to test it" below — ask both workspaces about Project FALCON-7.
 
 ---
 
@@ -173,11 +177,22 @@ committed, never sent to the browser, and never written to logs.
 
 ## How to test it
 
-`uv run python -m scripts.seed` creates two workspaces with distinct corpora:
+**Nothing to install.** Open
+**https://assignment-abstrabit.vercel.app** and sign in as
+`reviewer@example.com` / `groundwork-demo-2026`. The account already has two
+workspaces with deliberately unrelated corpora:
 
 - **Northwind Logistics** — a logistics handbook and a carrier review, plus a
   deliberate prompt-injection fixture.
 - **Meridian Health** — a patient intake policy and an incident standard.
+
+Switch between them with the picker at the top of the sidebar. Everything below
+works against the hosted app; running locally (`scripts.seed` creates the same
+two workspaces) is only needed if you want to step through the code.
+
+> The API sleeps after 15 minutes idle on Render's free tier. A scheduled ping
+> keeps it warm, but if the very first page load is slow, that is a cold start
+> waking up — it settles immediately after.
 
 ### 1. Grounded answers with citations
 
@@ -308,8 +323,24 @@ cd backend && uv run python -m scripts.smoke     # after seeding
 
 ## Deployment
 
+Live now, on two free-tier hosts:
+
+| Piece | Host | URL |
+| --- | --- | --- |
+| Client (Next.js) | Vercel | https://assignment-abstrabit.vercel.app |
+| API (FastAPI) | Render | https://groundwork-api-4gsp.onrender.com |
+| Documents | MongoDB Atlas M0 | — |
+| Vectors | Qdrant Cloud (1 GB) | — |
+
+No credit card on any of them. The browser only ever talks to the Vercel
+origin; `/api/*` is rewritten to Render server-side, so the API URL above is an
+implementation detail rather than something the client calls directly.
+
 The app is two services and cannot go on Vercel alone: the client is a Next.js
 app, the API is a long-running FastAPI process that streams SSE.
+
+The steps below are what was actually done, in order, and re-running them
+reproduces the deployment.
 
 **1. Datastores.** Create a free MongoDB Atlas M0 cluster and a free Qdrant
 Cloud cluster. From Atlas take the SRV connection string; from Qdrant take the
