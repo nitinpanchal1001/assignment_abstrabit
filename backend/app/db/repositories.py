@@ -351,7 +351,13 @@ class WorkspaceRepository:
             },
             {"$sort": {"total": -1}},
         ]
-        return [row async for row in self._c.tool_calls.aggregate(pipeline)]
+        # `aggregate()` must be awaited before it yields a cursor, unlike
+        # `find()`, which returns one synchronously. The asymmetry is real in
+        # pymongo's async API and silent at import: iterating the un-awaited
+        # coroutine only fails at request time, with "'async for' requires an
+        # object with __aiter__ method, got coroutine".
+        cursor = await self._c.tool_calls.aggregate(pipeline)
+        return [row async for row in cursor]
 
     async def recent_tool_failures(self, limit: int = 20) -> list[ToolCall]:
         """Only the calls that did not succeed, newest first.
