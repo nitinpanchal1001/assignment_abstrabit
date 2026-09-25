@@ -1,0 +1,293 @@
+@import "tailwindcss";
+
+/*
+ * Theme tokens.
+ *
+ * Three states, and all three must be covered or the toggle breaks in one
+ * direction:
+ *   1. :root                                    -> light (the default)
+ *   2. prefers-color-scheme: dark, unless the
+ *      user explicitly chose light              -> dark
+ *   3. [data-theme="dark"|"light"]              -> explicit choice wins
+ *
+ * A colour is never defined ONLY inside a media query, so "system" and an
+ * explicit choice can never disagree about what a token means.
+ *
+ * The palette is deliberately near-monochrome: one neutral ramp carries
+ * structure, and colour is reserved for meaning (links, citations, state).
+ * That is what keeps a dense dashboard calm.
+ */
+
+:root {
+  color-scheme: light;
+
+  --bg: #fcfcfc;
+  --surface: #ffffff;
+  --surface-2: #f5f5f4;
+  --border: #e8e8e6;
+  --border-strong: #d6d6d2;
+
+  --fg: #1a1a19;
+  --fg-muted: #6b6b66;
+  --fg-subtle: #9b9b95;
+
+  /* Primary action: near-black on light, near-white on dark. */
+  --primary: #1a1a19;
+  --primary-fg: #ffffff;
+  --primary-hover: #333330;
+
+  /* Brand: links, citation markers, active nav. Used sparingly. */
+  --brand: #2f6a5a;
+  --brand-soft: #e9f1ee;
+
+  --success: #2c6e49;
+  --success-soft: #e7f2ec;
+  --warning: #8a5a0b;
+  --warning-soft: #fbf2e3;
+  --danger: #a33322;
+  --danger-soft: #fbeae7;
+
+  --ring: #2f6a5a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #111112;
+    --surface: #18181a;
+    --surface-2: #1f1f22;
+    --border: #2a2a2e;
+    --border-strong: #3a3a40;
+
+    --fg: #ededec;
+    --fg-muted: #9d9d98;
+    --fg-subtle: #6e6e69;
+
+    --primary: #ededec;
+    --primary-fg: #18181a;
+    --primary-hover: #ffffff;
+
+    --brand: #7fbca8;
+    --brand-soft: #1b2926;
+
+    --success: #7fc09b;
+    --success-soft: #16251d;
+    --warning: #d9aa5e;
+    --warning-soft: #271f14;
+    --danger: #e28b78;
+    --danger-soft: #2a1917;
+
+    --ring: #7fbca8;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #111112;
+  --surface: #18181a;
+  --surface-2: #1f1f22;
+  --border: #2a2a2e;
+  --border-strong: #3a3a40;
+
+  --fg: #ededec;
+  --fg-muted: #9d9d98;
+  --fg-subtle: #6e6e69;
+
+  --primary: #ededec;
+  --primary-fg: #18181a;
+  --primary-hover: #ffffff;
+
+  --brand: #7fbca8;
+  --brand-soft: #1b2926;
+
+  --success: #7fc09b;
+  --success-soft: #16251d;
+  --warning: #d9aa5e;
+  --warning-soft: #271f14;
+  --danger: #e28b78;
+  --danger-soft: #2a1917;
+
+  --ring: #7fbca8;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border-base: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-hover: var(--primary-hover);
+
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    /* Theme swaps should feel like a change of light, not a repaint. */
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--brand-soft);
+    color: var(--fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* Native controls inherit the surface rather than the UA default. */
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* Restrained scrollbars; the default dark-on-dark bar is very loud. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  .prose-answer {
+    line-height: 1.7;
+  }
+  .prose-answer p + p {
+    margin-top: 0.75rem;
+  }
+  .prose-answer ul,
+  .prose-answer ol {
+    margin: 0.65rem 0;
+    padding-left: 1.15rem;
+    list-style: revert;
+  }
+  .prose-answer li + li {
+    margin-top: 0.3rem;
+  }
+  .prose-answer code {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.08em 0.32em;
+    font-size: 0.875em;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .prose-answer strong {
+    font-weight: 600;
+    color: var(--fg);
+  }
+}
+
+/* Motion. Short and eased — enough to show causality, never enough to wait on. */
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-pop { animation: pop-in 130ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes slide-in {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+.animate-slide-in { animation: slide-in 180ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 200ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* Loading indicators hold back for 150ms before fading in.
+   Most navigations resolve faster than that, and a spinner that appears and
+   disappears inside 150ms reads as a glitch rather than as progress. The
+   `both` fill mode is what keeps it invisible during the delay. */
+@keyframes delayed-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in-delayed { animation: delayed-fade-in 220ms ease 150ms both; }
+
+/* Typing caret shown while tokens stream in. */
+@keyframes caret-blink {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--brand);
+  animation: caret-blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    transition: none;
+  }
+  .caret::after,
+  .animate-pop,
+  .animate-slide-in,
+  .animate-rise,
+  .fade-in-delayed {
+    animation: none;
+  }
+
+  /* Spinners keep turning. They are the only signal that a request is still
+     in flight, so stopping them would remove information rather than motion —
+     they just turn at a calmer pace. */
+  .animate-spin {
+    animation-duration: 2.2s;
+  }
+}

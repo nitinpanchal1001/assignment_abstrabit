@@ -1,0 +1,55 @@
+[project]
+name = "groundwork-api"
+version = "1.0.0"
+description = "Workspace-scoped RAG API: grounded retrieval, tool calling, strict tenant isolation."
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    # Pydantic v2 does double duty: request validation AND the tool-argument
+    # schemas shown to the model, so the contract advertised and the contract
+    # enforced cannot drift apart.
+    "pydantic[email]>=2.10",
+    "pydantic-settings>=2.7",
+    # Async Mongo driver. `motor` is in maintenance mode; the async API now
+    # ships inside pymongo itself.
+    "pymongo>=4.11",
+    "qdrant-client>=1.13",
+    "google-genai>=1.0",
+    "bcrypt>=4.2",
+    "pyjwt>=2.10",
+    "python-multipart>=0.0.20",
+    "httpx>=0.28",
+    # Text extraction
+    "pypdf>=5.1",
+    "python-docx>=1.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
+ignore = ["B008"]  # FastAPI's Depends() in defaults is the documented pattern.
+
+[tool.ruff.lint.per-file-ignores]
+# The system prompt is one long string sent verbatim to the model. Wrapping it
+# to satisfy a line limit would change the text the model actually receives.
+"app/rag/prompt.py" = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+# Put the package root on sys.path explicitly. Without it, `uv run pytest`
+# happens to work while `uv run pytest tests/test_chunking.py` fails with a
+# bare "No module named 'app'" — pytest only prepends the test file's own
+# rootdir, and which directory that is depends on how you invoked it.
+pythonpath = ["."]
